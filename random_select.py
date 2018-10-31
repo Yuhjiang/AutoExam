@@ -16,7 +16,7 @@ def random_select(fpath):
     data = pd.read_csv(fpath)
 
     end = ''
-    while end != ':quit' or end != ':q':
+    while end != ':quit' and end != ':q':
         row = data.sample(n=1)
         index, number, question, answer, source, typen = row.iloc[0]
         # 输出题目

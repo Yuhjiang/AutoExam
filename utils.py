@@ -12,10 +12,12 @@ import numpy as np
 from scipy.linalg import norm
 from sklearn.feature_extraction.text import TfidfVectorizer
 import re
+import logging
 
+jieba.setLogLevel(logging.INFO)
 
-# model_file = r'E:\Program\Python\NLP\word2vec\news_12g_baidubaike_20g_novel_90g_embedding_64.bin'
-# model = models.KeyedVectors.load_word2vec_format(model_file, binary=True)
+model_file = r'E:\Program\Python\NLP\word2vec\news_12g_baidubaike_20g_novel_90g_embedding_64.bin'
+model = models.KeyedVectors.load_word2vec_format(model_file, binary=True)
 
 
 def similarity_tf_idf(answer_doc, true_doc):
@@ -26,7 +28,8 @@ def similarity_tf_idf(answer_doc, true_doc):
     :return:
     """
     def add_space(s):
-        return ' '.join(list(s))
+        new_s = [word for word in jieba.cut(s)]
+        return ' '.join(list(new_s))
 
     s1, s2 = add_space(answer_doc), add_space(true_doc)
 
@@ -44,6 +47,8 @@ def similarity_word2vec(answer_doc, true_doc):
     :param true_doc: 正确答案文本
     :return:
     """
+    answer_doc, true_doc = data_clean(answer_doc), data_clean(true_doc)
+
     def sentence_vector(s):
         words = jieba.lcut(s)
         v = np.zeros(64)
@@ -62,6 +67,16 @@ def data_clean(doc):
     :param doc:
     :return:
     """
-    string = re.sub('[\s+\.\!\/_,$%^*(+\"\']+|[+——！，。？、~@#￥%……&*（）()\[\]]+', '', doc)
+    string = re.findall(u'[\u4e00-\u9fa5]+', doc)
 
     return string
+
+
+if __name__ == '__main__':
+    s1 = '工程概况 风险因素分析 施工方法和施工工艺 基坑与周边环境安全保护 组织管理措施 施工安全技术措施' \
+         '变形控制指标 工程危险控制重点与难点'
+    s2 = '1  工程概况；2  工程地质与水文地质条件；3  风险因素分析；4  ' \
+         '工程危险控制重点与难点；5  施工方法和主要施工工艺；6  基坑与周边环境安全保护要求；7  ' \
+         '监测实施要求；8  变形控制指标与报警值；9 ' \
+         ' 施工安全技术措施；10  应急方案；11  组织管理措施。'
+    print(similarity_tf_idf(s1, s2))

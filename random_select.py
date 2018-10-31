@@ -10,6 +10,7 @@ Todo:       根据配置文件选择出题方式
 import pandas as pd
 import numpy as np
 import sys
+import utils
 
 
 def random_select(fpath):
@@ -22,12 +23,46 @@ def random_select(fpath):
         # 输出题目
         print(question)
         ans = input('输入答案：')
-        if ans == answer:
-            print('回答正确')
+        result = judgement(ans, answer, typen)
+        if result[0] > 0:
+            print(result[1])
         else:
-            print('回答错误')
+            print(result[1])
             print('正确答案：{}\n来源：{}'.format(answer, source))
         end = input()
+
+
+def judgement(my_answer, true_answer, question_type, word2vec=False):
+    """
+    判断答案对错
+    :param my_answer:
+    :param true_answer:
+    :param type:    问题类型
+    :param word2vec:
+    :return:
+    """
+    result = (-1, '回答错误')
+    if question_type in ['单项选择', '多项选择', '判断题']:
+        if my_answer == true_answer:
+            result = (1, '回答正确')
+    else:
+        sim1 = 0
+        sim2 = 0
+        try:
+            sim1 = utils.similarity_word2vec(my_answer, true_answer)
+        except:
+            sim2 = utils.similarity_tf_idf(my_answer, true_answer)
+        finally:
+            grade = max(sim1, sim2)
+        if grade >= 0.8:
+            result = (1, '非常正确')
+        elif 0.6 < grade < 0.8:
+            result = (0.7, '勉强正确')
+        elif 0.4 < grade <= 0.6:
+            result = (0.5, '还行吧……')
+        else:
+            result = (-1, '答案错误')
+    return result
 
 
 if __name__ == '__main__':

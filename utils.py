@@ -16,8 +16,8 @@ import logging
 
 jieba.setLogLevel(logging.INFO)
 
-model_file = r'E:\Program\Python\NLP\word2vec\news_12g_baidubaike_20g_novel_90g_embedding_64.bin'
-model = models.KeyedVectors.load_word2vec_format(model_file, binary=True)
+# model_file = r'E:\Program\Python\NLP\word2vec\news_12g_baidubaike_20g_novel_90g_embedding_64.bin'
+# model = models.KeyedVectors.load_word2vec_format(model_file, binary=True)
 
 
 def similarity_tf_idf(answer_doc, true_doc):

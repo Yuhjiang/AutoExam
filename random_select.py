@@ -11,15 +11,16 @@ import pandas as pd
 import numpy as np
 import sys
 import utils
+import re
 
 
 def random_select(fpath):
-    data = pd.read_csv(fpath)
+    data = pd.read_csv(fpath, index_col=0)
 
     end = ''
     new_data = data.sample(data.shape[0])
-    for i, row in new_data.iterrrows():
-        index, number, question, answer, source, typen = row
+    for i, row in new_data.iterrows():
+        index, question, answer, source, typen = row
         # 输出题目
         print(question)
         ans = input('输入答案：')
@@ -45,6 +46,13 @@ def judgement(my_answer, true_answer, question_type, word2vec=False):
     """
     result = (-1, '回答错误')
     if question_type in ['单项选择', '多项选择', '判断题']:
+        pattern = re.compile('[a-zA-Z]+')
+        my_answer = pattern.findall(my_answer)
+        my_answer.sort()
+        my_answer = ''.join(my_answer)
+        true_answer = pattern.findall(true_answer)
+        true_answer.sort()
+        true_answer = ''.join(true_answer)
         if my_answer == true_answer:
             result = (1, '回答正确')
     else:
@@ -68,5 +76,4 @@ def judgement(my_answer, true_answer, question_type, word2vec=False):
 
 
 if __name__ == '__main__':
-    fpath = sys.argv[1]
-    random_select('{}.csv'.format(fpath))
+    random_select('collection.csv')

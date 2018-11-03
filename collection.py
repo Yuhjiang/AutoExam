@@ -8,12 +8,12 @@ Updated:    2018/10/30 Ver 1.0 收集所有数据
 """
 import pandas as pd
 import xlrd
+import xlwt
 import sys
-import utils
+from utils import generate_name
+import json
 
-path = r'E:\中建三局\文件\题库\技术部题库20180105'
 columns = ['序号', '题目', '答案', '来源', '题型']
-pdata = pd.DataFrame(columns=columns)
 judge_answer = {
     '√': 'T',
     '×': 'F',
@@ -36,7 +36,7 @@ def read_excel_file(fpath):
     for table in data.sheets():
         nrows = table.nrows
 
-        for i in range(1, nrows-1):
+        for i in range(1, nrows):
             row = table.row_values(i)
             if row[1] == '':
                 continue
@@ -49,16 +49,82 @@ def read_excel_file(fpath):
             sources.append(row[4] + row[5])
             types.append(table.name)
 
+    excel_data = {
+        'index': index,
+        'questions': questions,
+        'answers': answers,
+        'sources': sources,
+        'types': types,
+    }
+
+    return excel_data
+
+
+def create_csv():
+    """
+    创建汇总所有题目的csv文件
+    :return:
+    """
+    with open('collection.json', 'r', encoding='utf-8') as load_f:
+        settings = json.load(load_f)
+    exam_repos = [excel for excel in settings['list']]
+    index = []
+    questions = []
+    answers = []
+    sources = []
+    types = []
+    for exam_repo in exam_repos:
+        excel_data = read_excel_file(settings['index'] + exam_repo + '.xlsx')
+        index += excel_data['index']
+        questions += excel_data['questions']
+        answers += excel_data['answers']
+        sources += excel_data['sources']
+        types += excel_data['types']
+
+    pdata = pd.DataFrame(columns=columns)
+
     pdata['序号'] = index
     pdata['题目'] = questions
     pdata['答案'] = answers
     pdata['来源'] = sources
     pdata['题型'] = types
+    pdata.to_csv('collection.csv')
+
+
+def create_excel():
+    """
+    创建汇总所有题目的excel文件
+    :return:
+    """
+    pdata = pd.read_csv('collection.csv', index_col=0)
+
+    alignment = xlwt.Alignment()
+    alignment.horz = xlwt.Alignment.HORZ_CENTER
+    alignment.wrap = xlwt.Alignment.WRAP_AT_RIGHT
+    borders = xlwt.Borders()
+    borders.left = xlwt.Borders.MEDIUM
+    style2 = xlwt.XFStyle()
+    style2.alignment = alignment
+
+    alignment.vert = xlwt.Alignment.VERT_CENTER
+    style = xlwt.XFStyle()
+    style.alignment = alignment
+
+    workbook = xlwt.Workbook(encoding='utf-8')
+    worksheet = workbook.add_sheet('题目')
+
+    worksheet.write(0, 0, label='序号', style=style)
+    worksheet.write(0, 1, label='题型', style=style)
+    worksheet.write(0, 2, label='题目', style=style)
+    worksheet.write(0, 3, label='答案', style=style)
+    for i, row in pdata.iterrows():
+        worksheet.write(i+1, 0, label=str(i+1), style=style)
+        worksheet.write(i+1, 1, label=row['题型'], style=style)
+        worksheet.write(i+1, 2, label=row['题目'], style=style2)
+
+    workbook.save('exam.xls')
 
 
 if __name__ == '__main__':
-    fpath = path + '\\' + sys.argv[1] + '.xlsx'
-    # fpath = path + '\\' + 'GB50202-2002建筑地基基础工程施工质量验收规范.xlsx'
-    read_excel_file(fpath)
-    csv_name = utils.generate_name(sys.argv[1])
-    pdata.to_csv(csv_name + '.csv')
+    create_csv()
+    create_excel()

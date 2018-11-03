@@ -17,9 +17,9 @@ def random_select(fpath):
     data = pd.read_csv(fpath)
 
     end = ''
-    while end != ':quit' and end != ':q':
-        row = data.sample(n=1)
-        index, number, question, answer, source, typen = row.iloc[0]
+    new_data = data.sample(data.shape[0])
+    for i, row in new_data.iterrrows():
+        index, number, question, answer, source, typen = row
         # 输出题目
         print(question)
         ans = input('输入答案：')
@@ -30,6 +30,8 @@ def random_select(fpath):
             print(result[1])
             print('正确答案：{}\n来源：{}'.format(answer, source))
         end = input()
+        if end in [':quit', ':q']:
+            break
 
 
 def judgement(my_answer, true_answer, question_type, word2vec=False):

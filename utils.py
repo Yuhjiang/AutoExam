@@ -7,7 +7,7 @@ Created:    2018/10/31
 Updated:    2018/10/31 Ver 1.0 判断题目对错
 """
 import jieba
-from gensim import models, similarities, corpora
+from gensim import models
 import numpy as np
 from scipy.linalg import norm
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -36,7 +36,6 @@ def similarity_tf_idf(answer_doc, true_doc):
     cv = TfidfVectorizer(tokenizer=lambda s: s.split())
     corpus = [s1, s2]
     vectors = cv.fit_transform(corpus).toarray()
-
     return np.dot(vectors[0], vectors[1]) / (norm(vectors[0]) * norm(vectors[1]))
 
 
@@ -70,6 +69,19 @@ def data_clean(doc):
     string = re.findall(u'[\u4e00-\u9fa5]+', doc)
 
     return string
+
+
+def generate_name(doc_name):
+    """
+    生成规范名，只包含字母数字，如GB20202-2002
+    :param doc_name:
+    :return:
+    """
+    doc_name = doc_name.replace('－', '-')
+    doc_name = doc_name.replace(' ', '')
+    ind = doc_name.find('-', 1)
+    name = doc_name[:ind+5]
+    return name
 
 
 if __name__ == '__main__':

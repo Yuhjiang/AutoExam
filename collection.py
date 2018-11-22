@@ -117,11 +117,13 @@ def create_excel():
     worksheet.write(0, 1, label='题型', style=style)
     worksheet.write(0, 2, label='题目', style=style)
     worksheet.write(0, 3, label='答案', style=style)
+    worksheet.write(0, 6, label='答案', style=style)
+
     for i, row in pdata.iterrows():
         worksheet.write(i+1, 0, label=str(i+1), style=style)
         worksheet.write(i+1, 1, label=row['题型'], style=style)
         worksheet.write(i+1, 2, label=row['题目'], style=style2)
-
+        worksheet.write(i + 1, 6, label=row['答案'], style=style2)
     workbook.save('exam.xls')
 
 

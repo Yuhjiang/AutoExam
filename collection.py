@@ -124,12 +124,14 @@ def create_excel():
         settings = json.load(load_f)
         types = settings['type']
 
+    ind = 0
     for i, row in data.iterrows():
         if row['题型'] in types:
-            worksheet.write(i+1, 0, label=str(i+1), style=style)
-            worksheet.write(i+1, 1, label=row['题型'], style=style)
-            worksheet.write(i+1, 2, label=row['题目'], style=style2)
-            worksheet.write(i+1, 6, label=row['答案'], style=style2)
+            ind += 1
+            worksheet.write(ind, 0, label=str(i+1), style=style)
+            worksheet.write(ind, 1, label=row['题型'], style=style)
+            worksheet.write(ind, 2, label=row['题目'], style=style2)
+            worksheet.write(ind, 6, label=row['答案'], style=style2)
     workbook.save('exam.xls')
 
 
